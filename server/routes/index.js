@@ -15,7 +15,8 @@ module.exports = {
         path: '/import',
         handler: 'csvImport.importCSV',
         config: {
-          policies: []
+          policies: [],
+          auth: false,
         }
       },
     ]

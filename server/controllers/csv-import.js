@@ -38,7 +38,8 @@ module.exports = {
 
       return [
         true,
-        `Successfully imported ${importResults.length} records`,
+        //`Successfully imported ${importResults.length} records`,
+        `Successfully imported some records`,
         importResults
       ];
     } catch (error) {
@@ -46,29 +47,6 @@ module.exports = {
       return [
         false,
         error.message || 'An error occurred during CSV import',
-        null
-      ];
-    }
-  },
-
-  async getContentTypes() {
-    console.log('boo - controller');
-    alert('boo - controller');
-    try {
-      const contentTypeService = strapi.plugin('csv-import').service('content-type');
-      const contentTypes = await contentTypeService.getAvailableContentTypes();
-      if (contentTypes) {
-        return [
-          true,
-          'Content types retrieved successfully',
-          contentTypes
-        ];
-      }
-    } catch (error) {
-      console.error('Content types fetch error:', error);
-      return [
-        false,
-        error.message || 'An error occurred fetching content types',
         null
       ];
     }

@@ -6,13 +6,13 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ContentTypeDropdown from '../../components/ContentTypeDropdown';
 import {
   Layout,
   ContentLayout,
   HeaderLayout,
   Button,
   Select,
+  Option,
   Typography,
 } from '@strapi/design-system';
 import { LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
@@ -23,18 +23,17 @@ import pluginId from '../../pluginId';
 const HomePage = () => {
   const [contentTypes, setContentTypes] = useState([]);
   const [selectedContentType, setSelectedContentType] = useState(null);
+
+
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { get } = useFetchClient();
 
   // Fetch available content types
-  /* useEffect(() => {
+  useEffect(() => {
     const fetchContentTypes = async () => {
-      console.log('boo');
       try {
-        const data = await useFetchClient('/content-type-builder/content-types', {
-          method: 'GET',
-        });
-        console.log('hoo');
+        const { data } = await get('/content-type-builder/content-types');
         const userContentTypes = Object.values(data.data).filter(
           (type) => !type.plugin
         );
@@ -43,8 +42,9 @@ const HomePage = () => {
         console.error('Failed to fetch content types', error);
       }
     };
+
     fetchContentTypes();
-  }, []); */
+  }, [get]);
 
   // Handle file selection
   const handleFileChange = (e) => {
@@ -61,14 +61,23 @@ const HomePage = () => {
     setIsLoading(true);
     try {
       const formData = new FormData();
+      console.log(file);
       formData.append('file', file);
-      formData.append('contentType', selectedContentType.value);
+      formData.append('contentType', selectedContentType);
 
-      const response = await axios.post('/api/csv-import/import', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      // Debug logs
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ', ' + pair[1]);
+      }
+
+      const response = await axios.post('/csv-import/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // Changed this line
+        }
       });
 
-      alert(`Successfully imported ${response.data.importedRecords.length} records`);
+      //alert(`Successfully imported ${response.data.importedRecords.length} records`);
+      alert(`Successfully imported some records`);
     } catch (error) {
       console.error('Import error', error);
       alert('Failed to import CSV');
@@ -83,16 +92,26 @@ const HomePage = () => {
       <HeaderLayout title="CSV Import" />
       <ContentLayout>
         <div style={{ maxWidth: '500px', margin: 'auto', padding: '20px' }}>
-          <Typography variant="h2">Import CSV</Typography>
+
+          <Select
+            label="Select a Content Type"
+            placeholder="Select a content type"
+            value={selectedContentType}
+            onChange={setSelectedContentType}
+          >
+            {contentTypes.map((contentType) => (
+              <Option key={contentType.uid} value={contentType.uid}>
+                {contentType.schema.displayName}
+              </Option>
+            ))}
+          </Select>
           
-          <h2>Select a Content Type</h2>
-          <ContentTypeDropdown />
-              <input 
-                type="file" 
-                accept=".csv" 
-                onChange={handleFileChange} 
-                style={{ marginTop: '20px' }}
-              />
+          <input 
+            type="file" 
+            accept=".csv" 
+            onChange={handleFileChange} 
+            style={{ marginTop: '20px' }}
+          />
 
           <Button 
             onClick={handleImport} 
