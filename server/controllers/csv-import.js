@@ -2,30 +2,22 @@ const { parse } = require('csv-parse/sync');
 const fs = require('fs');
 
 module.exports = {
-  async importCSV({ files, contentType }) {
+  async importCSV(ctx) {
+    const { contentType } = ctx.request.body;
+    const { files } = ctx.request.files || {};
+    console.log('contentType:', contentType);
+    console.log('Processed files:', files);
+
     try {
-      const { file } = files;
       
       // Read CSV file
-      const fileContent = fs.readFileSync(file.filepath, 'utf8');
+      const fileContent = fs.readFileSync(files.path, 'utf8');
       
       // Parse CSV
       const records = parse(fileContent, {
         columns: true,
         skip_empty_lines: true
       });
-
-      // Validate content type
-      const contentTypeService = strapi.plugin('csv-import').service('content-type');
-      const validContentTypes = await contentTypeService.getAvailableContentTypes();
-      
-      if (!validContentTypes.includes(contentType)) {
-        return [
-          false,
-          'Invalid content type selected',
-          null
-        ];
-      }
 
       // Import records
       const importResults = [];
