@@ -3,12 +3,21 @@ const fs = require('fs');
 
 module.exports = {
   async importCSV(ctx) {
-    const { contentType } = ctx.request.body;
+    const { contentType, remove } = ctx.request.body;
     const { files } = ctx.request.files || {};
-    console.log('contentType:', contentType);
-    console.log('Processed files:', files);
+    //console.log('contentType:', contentType);
+    //console.log('Remove existing content:', remove);
+    //console.log('Processed files:', files);
 
     try {
+      // Check if 'remove' flag is true and delete existing content
+      if (remove == 'true') {
+        const existingEntries = await strapi.entityService.findMany(contentType);
+        for (const entry of existingEntries) {
+          await strapi.entityService.delete(contentType, entry.id);
+        }
+        console.log(`Removed all existing entries for content type ${contentType}`);
+      }
       
       // Read CSV file
       const fileContent = fs.readFileSync(files.path, 'utf8');
@@ -30,7 +39,6 @@ module.exports = {
 
       return [
         true,
-        //`Successfully imported ${importResults.length} records`,
         `Successfully imported some records`,
         importResults
       ];

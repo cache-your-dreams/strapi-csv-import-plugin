@@ -12,6 +12,7 @@ import {
   HeaderLayout,
   Button,
   Select,
+  Checkbox,
   Option,
   Typography,
 } from '@strapi/design-system';
@@ -23,9 +24,8 @@ import pluginId from '../../pluginId';
 const HomePage = () => {
   const [contentTypes, setContentTypes] = useState([]);
   const [selectedContentType, setSelectedContentType] = useState(null);
-
-
   const [file, setFile] = useState(null);
+  const [removeExistingContent, setRemoveExistingContent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { get } = useFetchClient();
 
@@ -63,19 +63,14 @@ const HomePage = () => {
       const formData = new FormData();
       formData.append('files', file);
       formData.append('contentType', selectedContentType);
-
-      // Debug logs
-      // for (let pair of formData.entries()) {
-      //   console.log(pair[0] + ', ' + pair[1]);
-      // }
+      formData.append('remove', removeExistingContent);
 
       const response = await axios.post('/csv-import/import', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // Changed this line
+          'Content-Type': 'multipart/form-data'
         }
       });
 
-      //alert(`Successfully imported ${response.data.importedRecords.length} records`);
       alert(`Successfully imported some records`);
     } catch (error) {
       console.error('Import error', error);
@@ -111,6 +106,14 @@ const HomePage = () => {
             onChange={handleFileChange} 
             style={{ marginTop: '20px' }}
           />
+
+          <Checkbox 
+            name="remove"
+            checked={removeExistingContent}
+            onChange={() => setRemoveExistingContent(!removeExistingContent)}
+          >
+            Remove existing Content
+          </Checkbox>
 
           <Button 
             onClick={handleImport} 
