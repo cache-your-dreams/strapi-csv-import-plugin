@@ -21,43 +21,26 @@ module.exports = {
 
       // Parse CSV
       const records = parse(fileContent, {
-        columns: true,
-        delimiter: ';',
+        columns: true, // Use header row for keys
+        relax_column_count: true,
+        delimiter: ',',
+        relax_quotes: true,
         skip_empty_lines: true,
       });
 
       // Get content type schema
       const contentTypeSchema = strapi.getModel(contentType);
       const validFields = Object.keys(contentTypeSchema.attributes);
+      console.log(validFields);
 
-      // Validate and import records
+      // Import records directly without field validation
       const importResults = [];
       const importErrors = [];
       for (const [index, record] of records.entries()) {
-        const validRecord = {};
-        let hasInvalidField = false;
-
-        // Map CSV columns to valid fields
-        for (const key of Object.keys(record)) {
-          if (validFields.includes(key)) {
-            validRecord[key] = record[key] === '' ? null : record[key];
-          } else {
-            hasInvalidField = true;
-          }
-        }
-
-        if (hasInvalidField) {
-          importErrors.push({
-            row: index + 1,
-            error: `Invalid fields found in the record: ${JSON.stringify(record)}`,
-          });
-          continue;
-        }
-
-        // Import the valid record
+        // Import the record
         try {
           const importedEntry = await strapi.entityService.create(contentType, {
-            data: validRecord,
+            data: record,
           });
           importResults.push(importedEntry);
         } catch (error) {
