@@ -1,7 +1,7 @@
 'use strict';
 
-const csvImport = require('./csv-import');
+const importService = require('./import-service');
 
 module.exports = {
-  csvImport,
+  importService,
 };
