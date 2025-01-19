@@ -22,6 +22,7 @@ import { LoadingIndicatorPage, useFetchClient } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 
 const HomePage = () => {
+  const [responseData, setResponseData] = useState(null);
   const [contentTypes, setContentTypes] = useState([]);
   const [selectedContentType, setSelectedContentType] = useState(null);
   const [file, setFile] = useState(null);
@@ -70,11 +71,9 @@ const HomePage = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-
-      alert(`Successfully imported some records`);
+      setResponseData(response.data); // Save response data to state
     } catch (error) {
       console.error('Import error', error);
-      alert('Failed to import CSV');
     }
     setIsLoading(false);
   };
@@ -83,6 +82,15 @@ const HomePage = () => {
 
   return (
     <Layout>
+
+      <div>
+        {responseData && (
+          <div>
+            <h3>Response Data:</h3>
+            <pre>{JSON.stringify(responseData.message, null, 2)}</pre>
+          </div>
+        )}
+      </div>
       <HeaderLayout title="CSV Import" />
       <ContentLayout>
         <div style={{ maxWidth: '500px', margin: 'auto', padding: '20px' }}>
